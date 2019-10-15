@@ -39,12 +39,26 @@ class Gauge {
         .style("stroke-width", "2px");
       let fontSize = Math.round(self.config.size / 16);
       if (undefined !== self.config.label) {
+        const arcPoints = d3.ticks(0, 100, 30)
+          .map(tick => self.percentageToPoint(tick / 100, 0.6));
+        const arcLine = d3
+          .line()
+          .x(d => d.x)
+          .y(d => d.y)
+          .curve(d3.curveBasisOpen);
         self.body
+          .append("defs")
+          .data([arcPoints])
+          .append("svg:path")
+          .attr("d", arcLine)
+          .attr("id", "text-path");
+        const labelText = self.body
           .append("svg:text")
-          .attr("x", self.config.cx)
-          .attr("y", self.config.cy / 2 + fontSize / 2)
           .attr("dy", fontSize / 2)
-          .attr("text-anchor", "middle")
+          .attr("text-anchor", "middle");
+        labelText.append("svg:textPath")
+          .attr("xlink:href", "#text-path")
+          .attr("startOffset", "50%")
           .text(self.config.label)
           .style("font-size", `${fontSize}px`)
           .style("fill", "#333333")
